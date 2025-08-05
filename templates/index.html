@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journal Tracker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            font-size: 48px;
+            background-color: #3E5F44;
+            color: #E8FFD7;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+            width: 100%;
+            max-width: 600px;
+            font-size: 48px;
+        }
+
+        #entries, #add-entry, #search-entry {
+            width: 100%;
+            font-size: 24px;
+        }
+
+        ul#entries-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 0;
+            list-style: none;
+        }
+
+        ul#entries-list .list-group-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        ul.list-group {
+            display: flex; /* Use Flexbox for the list */
+            flex-direction: column; /* Stack items vertically */
+            gap: 0.5rem; /* Add spacing between list items */
+            padding: 0;
+            list-style: none; /* Remove default bullet points */
+        }
+
+        ul.list-group .list-group-item {
+            display: flex; /* Use Flexbox for each list item */
+            justify-content: space-between; /* Space out content horizontally */
+            align-items: center; /* Align items vertically */
+            padding: 0.5rem 1rem; /* Add padding for better spacing */
+            border: 1px solid #ccc; /* Add a border for better visibility */
+            border-radius: 5px; /* Add rounded corners */
+            background-color: #d4edda; /* Light green background */
+            color: #155724; /* Dark green text for better contrast */
+        }
+
+        button {
+            color: #5E936C !important; /* Green background */
+            background-color: #E8FFD7 !important; /* White text */
+            border: none; /* Remove default border */
+            padding: 10px 20px; /* Add padding for better spacing */
+            text-align: center; /* Center the text */
+            text-decoration: none; /* Remove underline */
+            display: inline-block; /* Inline-block for proper layout */
+            font-size: 16px; /* Adjust font size */
+            border-radius: 5px; /* Add rounded corners */
+            cursor: pointer; /* Change cursor to pointer on hover */
+            transition: background-color 0.3s ease; /* Smooth hover effect */
+        }
+
+        button:hover {
+            background-color: #45a049; /* Darker green on hover */
+        }
+
+        button:disabled {
+            background-color: #ccc; /* Gray background for disabled state */
+            cursor: not-allowed; /* Show not-allowed cursor for disabled buttons */
+        }
+        
+        button.btn{
+            color: #E8FFD7; /* Light text color */
+        }
+
+        
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center" font-size="48px">Journal Tracker</h1>
+        
+        <!-- Section to display past entries -->
+        <div id="entries" class="mt-4">
+            <h3>Past Entries</h3>
+            <ul id="entries-list" class="list-group"></ul>
+        </div>
+        
+        <!-- Section to search for an entry by date -->
+        <div id="search-entry" class="mt-5">
+            <h3>Search Entry by Date</h3>
+            <form id="search-form">
+                <div class="mb-3">
+                    <label for="search-date" class="form-label">Date</label>
+                    <input type="date" id="search-date" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-secondary">Search</button>
+            </form>
+            <div id="search-result" class="mt-3"></div>
+        </div>
+        
+        <!-- Section to add a new entry -->
+        <div id="add-entry" class="mt-5">
+            <h3>Add New Entry</h3>
+            <form id="entry-form">
+                <div class="mb-3">
+                    <label for="date" class="form-label">Date</label>
+                    <input type="date" id="date" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="entry" class="form-label">Entry</label>
+                    <textarea id="entry" class="form-control" rows="4" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Entry</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const entriesList = document.getElementById('entries-list');
+            const entryForm = document.getElementById('entry-form');
+            const searchForm = document.getElementById('search-form');
+            const searchResult = document.getElementById('search-result');
+
+            // Fetch and display past entries
+            // fetch('/api/entries')
+            //     .then(response => response.json())
+            //     .then(entries => {
+            //         entries.forEach(entry => {
+            //             const li = document.createElement('li');
+            //             li.className = 'list-group-item';
+            //             li.textContent = `${entry.date}: ${entry.entry}`;
+            //             entriesList.appendChild(li);
+            //         });
+            //     });
+
+            // Handle form submission for adding a new entry
+            entryForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const date = document.getElementById('date').value;
+                const entry = document.getElementById('entry').value;
+
+                fetch('/api/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ date, entry }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    entryForm.reset();
+                    location.reload();
+                });
+            });
+
+            // Handle form submission for searching an entry by date
+            searchForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const searchDate = document.getElementById('search-date').value;
+
+                fetch('/api/specificdate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ date: searchDate }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error || data.message) {
+                        searchResult.textContent = data.error || data.message;
+                        searchResult.className = 'text-danger';
+                    } else if (data.length > 0) {
+                        // searchResult.textContent = data.map(entry => `${entry.date}: ${entry.entry}`).join('\n\n');
+                        // searchResult.className = 'text-success';
+                        // Create a <ul> element to hold the list items
+                        const ul = document.createElement('ul');
+                        ul.className = 'list-group';
+
+                        // Iterate through the entries and create <li> elements
+                        data.forEach(entry => {
+                            const li = document.createElement('li');
+                            li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                            li.textContent = `${entry.date}: ${entry.entry}`;
+                            ul.appendChild(li);
+                        });
+
+                        // Append the <ul> to the searchResult div
+                        searchResult.appendChild(ul);
+                        searchResult.className = 'text-success';
+                    } else {
+                        searchResult.textContent = 'No entries found for the specified date.';
+                        searchResult.className = 'text-warning';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
